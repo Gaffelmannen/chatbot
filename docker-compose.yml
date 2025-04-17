@@ -1,0 +1,23 @@
+services:
+
+    irc-server:
+        image: inspircd/inspircd-docker:latest
+        container_name: inspircd
+        restart: always
+        ports:
+        - "6667:6667"   # Standard IRC port
+        - "6697:6697"   # SSL port, optional
+        volumes:
+        - ./irc/inspircd.conf:/inspircd/conf/inspircd.conf
+        - ./irc/certs:/inspircd/certs
+        environment:
+        - INSP_NET_NAME=TheLocalyNet
+
+    chatbot:
+        build: bot/.
+        command: python -u app.py
+        environment:
+            OPENAI_API_KEY : $OPENAI_API_KEY
+        volumes:
+            - /Users/hans/workspace/temp:/app/data
+
