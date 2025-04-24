@@ -4,6 +4,7 @@
 from openai import OpenAI
 import irc.client
 import os
+import textwrap
 from roboto import Roboto
 
 SERVER = os.getenv("IRC_SERVER", "inspircd")
@@ -12,14 +13,19 @@ NICK = os.getenv("IRC_NICK", "God")
 CHANNEL = os.getenv("IRC_CHANNEL", "#local")
 API_KEY = os.getenv("OPENAI_API_KEY")
 
+IRC_MAX_MESSAGE_LENGTH = 450
+
 OpenAI.api_key = API_KEY
 client = OpenAI(api_key=API_KEY)
 
 use_chat_gpt = True
 rob = Roboto()
 
+def split_into_chunks(s):
+    return textwrap.wrap(s, IRC_MAX_MESSAGE_LENGTH)
+
 def ask_rob(query):
-    return rob.talk(query=query)
+    return rob.talk(query)
 
 def ask_gpt(prompt):
     try:
@@ -35,20 +41,29 @@ def ask_gpt(prompt):
 
 def on_connect(connection, event):
     connection.join(CHANNEL)
-    connection.privmsg(CHANNEL, "Walk in the light my son.")
+    connection.privmsg(CHANNEL, "Walk in the light my children.")
 
 def on_message(connection, event):
     user_msg = event.arguments[0]
     if NICK.lower() in user_msg.lower():
         prompt = f"{event.source.nick} says: {user_msg}"
+        print(prompt)
+        
+        user_msg = user_msg.lower()
+        user_msg = user_msg.replace(NICK.lower(), "")
 
         if use_chat_gpt:
             reply = ask_gpt(user_msg)
         else:
             reply = ask_rob(user_msg)
         
-        connection.privmsg(CHANNEL, f"{event.source.nick}: {reply}")
-        print(prompt)
+        reply = reply.strip()
+        print(reply)
+        
+        messages = split_into_chunks(reply)
+        for message in messages:
+            connection.privmsg(CHANNEL, f"{event.source.nick}: {message}")
+        
 
 def main():
     reactor = irc.client.Reactor()
