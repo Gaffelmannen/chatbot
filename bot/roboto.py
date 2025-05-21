@@ -93,11 +93,11 @@ class Roboto:
                     pass
         return f"I have not got the slightest clue about {query}."
     
-    def talk(self, input):
+    def talk(self, query: str) -> str:
         response = ""
-        if input.startswith("wiki "):
+        if query.startswith("wiki "):
             print("--- 1")
-            print(f"input={input}")
+            print(f"input={query}")
             
             query = (query[5:]).lstrip()
             print(f"squery={query}")
@@ -106,5 +106,5 @@ class Roboto:
             response = self._summarize(subject_details)
         else:
             print("--- 2")
-            response = self.chat.respond(input)
+            response = self.chat.respond(query)
         return response

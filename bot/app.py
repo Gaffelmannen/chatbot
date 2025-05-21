@@ -24,8 +24,9 @@ rob = Roboto()
 def split_into_chunks(s):
     return textwrap.wrap(s, IRC_MAX_MESSAGE_LENGTH)
 
-def ask_rob(query):
-    return rob.talk(query)
+def ask_rob(input):
+    print(f"ask_rob={input}")
+    return rob.talk(query=input)
 
 def ask_gpt(prompt):
     try:
@@ -51,6 +52,7 @@ def on_message(connection, event):
         
         user_msg = user_msg.lower()
         user_msg = user_msg.replace(NICK.lower(), "")
+        user_msg = user_msg.strip()
 
         if use_chat_gpt:
             reply = ask_gpt(user_msg)

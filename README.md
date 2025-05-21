@@ -38,6 +38,9 @@ SELECT * FROM chatlog WHERE user = 'username' ORDER BY timestamp DESC LIMIT 5;
 ### Control
 Use any IRC client to connect.
 
+Example:
+Irssi v1.4.5 - https://irssi.org
+
 
 
 ### Documentation
