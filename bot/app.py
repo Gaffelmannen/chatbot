@@ -5,7 +5,9 @@ from openai import OpenAI
 import irc.client
 import os
 import textwrap
+import datetime
 from roboto import Roboto
+from chatlog import Chatlog
 
 SERVER = os.getenv("IRC_SERVER", "inspircd")
 PORT = int(os.getenv("IRC_PORT", 6667))
@@ -47,9 +49,16 @@ def on_connect(connection, event):
 def on_message(connection, event):
     user_msg = event.arguments[0]
     if NICK.lower() in user_msg.lower():
-        prompt = f"{event.source.nick} says: {user_msg}"
-        print(prompt)
+        cl = Chatlog()
+        #prompt = f"{event.source.nick} says: {user_msg}"
         
+        cl.insert_row(
+            log_channel=CHANNEL,
+            log_message=user_msg.replace(f"{event.source.nick}", ""),
+            log_user=event.source.nick,
+            log_timestamp=datetime.datetime.now()
+        )
+
         user_msg = user_msg.lower()
         user_msg = user_msg.replace(NICK.lower(), "")
         user_msg = user_msg.strip()
@@ -60,12 +69,17 @@ def on_message(connection, event):
             reply = ask_rob(user_msg)
         
         reply = reply.strip()
-        print(reply)
         
         messages = split_into_chunks(reply)
         for message in messages:
             connection.privmsg(CHANNEL, f"{event.source.nick}: {message}")
         
+        cl.insert_row(
+            log_channel=CHANNEL,
+            log_message=reply,
+            log_user=NICK,
+            log_timestamp=datetime.datetime.now()
+        )
 
 def main():
     reactor = irc.client.Reactor()
@@ -77,9 +91,10 @@ def main():
 
 if __name__ == "__main__":
     print("Das boot is a bot.")
-    print(f"API_KEY={API_KEY}")
+
     if ask_gpt("test") != "Error":
         use_chat_gpt = True
     else:
         use_chat_gpt = False
+    
     main()

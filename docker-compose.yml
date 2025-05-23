@@ -5,19 +5,44 @@ services:
         container_name: inspircd
         restart: always
         ports:
-        - "6667:6667"   # Standard IRC port
-        - "6697:6697"   # SSL port, optional
+            - "6667:6667"   # Standard IRC port
+            - "6697:6697"   # SSL port, optional
         volumes:
-        - ./irc/inspircd.conf:/inspircd/conf/inspircd.conf
-        - ./irc/certs:/inspircd/certs
+            - ./irc/inspircd.conf:/inspircd/conf/inspircd.conf
+            - ./irc/certs:/inspircd/certs
         environment:
-        - INSP_NET_NAME=TheLocalyNet
+            - INSP_NET_NAME=TheLocalyNet
+        networks:
+            - chatbot_network
 
     chatbot:
         build: bot/.
         command: python -u app.py
         environment:
             OPENAI_API_KEY : $OPENAI_API_KEY
+            CHATBOT_POSTGRES_PASSWORD : $CHATBOT_POSTGRES_PASSWORD
+            CHATBOT_POSTGRES_USER : $CHATBOT_POSTGRES_USER
+            CHATBOT_POSTGRES_DB : $CHATBOT_POSTGRES_DB
         volumes:
             - /Users/hans/workspace/temp:/app/data
+        networks:
+            - chatbot_network
+            - db_network
+
+    postgres:
+        image: postgres:14-alpine
+        ports:
+            - 5432:5432
+        volumes:
+            - ~/apps/postgres:/var/lib/postgresql/data
+        environment:
+            - POSTGRES_PASSWORD=$CHATBOT_POSTGRES_PASSWORD
+            - POSTGRES_USER=$CHATBOT_POSTGRES_USER
+            - POSTGRES_DB=$CHATBOT_POSTGRES_DB
+        networks:
+            - db_network
+
+networks:
+    chatbot_network:
+    db_network:
 

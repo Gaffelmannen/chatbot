@@ -33,12 +33,12 @@ class Roboto:
             [r"(.*)", ["I'm sorry, I didn't understand that. Could you rephrase?", "Could you please elaborate?"]]
         ]
 
+        self.wikiword = "wiki "
+
         self.chat = Chat(self.pairs, reflections)
         self.stop_words = set(stopwords.words("english"))
 
-        pass
-
-    def _summarize(self, text):
+    def _summarize(self, text: str) -> str:
         sentences = sent_tokenize(text)
         preprocessed_sentences = [self._preprocess_text(sentence) for sentence in sentences]
         flat_preprocessed_words = [word for sentence in preprocessed_sentences for word in sentence]
@@ -53,11 +53,11 @@ class Roboto:
             
             for index, _ in top_sentences:
                 summary_sentences.append(sentences[index])
-        summary = ' '.join(summary_sentences)
+        summary = " ".join(summary_sentences)
 
         return summary
 
-    def _score_sentences(self, sentences, word_freq):
+    def _score_sentences(self, sentences: list, word_freq: list) -> dict:
         sentence_scores = {}
         
         for i, sentence in enumerate(sentences):
@@ -70,7 +70,7 @@ class Roboto:
         
         return sentence_scores
 
-    def _preprocess_text(self, sentence):
+    def _preprocess_text(self, sentence: str) -> str:
         sentence = re.sub(r"[^a-zA-Z0-9]", " ", sentence)
         
         words = word_tokenize(sentence)
@@ -82,7 +82,7 @@ class Roboto:
         
         return stemmed
 
-    def _investigate_subject(self, query):
+    def _investigate_subject(self, query: str) -> str:
         try:
             return wikipedia.summary(query)
         except Exception:
@@ -95,16 +95,10 @@ class Roboto:
     
     def talk(self, query: str) -> str:
         response = ""
-        if query.startswith("wiki "):
-            print("--- 1")
-            print(f"input={query}")
-            
-            query = (query[5:]).lstrip()
-            print(f"squery={query}")
-
+        if query.startswith(self.wikiword):
+            query = (query[len(self.wikiword):]).lstrip()
             subject_details = self._investigate_subject(query)
             response = self._summarize(subject_details)
         else:
-            print("--- 2")
             response = self.chat.respond(query)
         return response

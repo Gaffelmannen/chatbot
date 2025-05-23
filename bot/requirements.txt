@@ -3,3 +3,4 @@ pyyaml>=6.0.2
 openai>=1.75.0
 nltk
 wikipedia>=1.4.0
+psycopg2>=2.9.10
