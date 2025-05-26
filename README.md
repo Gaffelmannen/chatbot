@@ -32,7 +32,7 @@ The chatbot with ChatGPT.
 
 Read chatlogs
 ```sql
-SELECT * FROM chatlog WHERE user = 'username' ORDER BY timestamp DESC LIMIT 5;
+SELECT * FROM chatlog WHERE log_user = 'username' ORDER BY log_timestamp DESC LIMIT 5;
 ```
 
 ### Control

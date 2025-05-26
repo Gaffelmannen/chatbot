@@ -12,7 +12,7 @@ import re
 
 import wikipedia
 
-
+from chatlog import Chatlog
 
 class Roboto:
 
@@ -34,6 +34,7 @@ class Roboto:
         ]
 
         self.wikiword = "wiki "
+        self.historyword = "history "
 
         self.chat = Chat(self.pairs, reflections)
         self.stop_words = set(stopwords.words("english"))
@@ -92,13 +93,24 @@ class Roboto:
                 except Exception:
                     pass
         return f"I have not got the slightest clue about {query}."
-    
+
+    def _check_history_for_user(self, username: str) -> str:
+        cl = Chatlog()
+        data = cl.get_log_entry_by_user(username)
+        return data
+
     def talk(self, query: str) -> str:
         response = ""
         if query.startswith(self.wikiword):
             query = (query[len(self.wikiword):]).lstrip()
             subject_details = self._investigate_subject(query)
             response = self._summarize(subject_details)
+        elif query.startswith(self.historyword):
+            query = (query[len(self.historyword):]).lstrip()
+            history_details = self._check_history_for_user("gaffelmannen")
+            print(history_details)
+            #response = self._summarize(history_details)
         else:
             response = self.chat.respond(query)
+        
         return response

@@ -62,12 +62,62 @@ class Chatlog:
 
     def get_all_log_entries(self):
         cursor = self.connect().cursor()
-        cursor.execute("SELECT log_channel,log_message,log_user,log_timestamp FROM chatlog")
+        cursor.execute(
+            "SELECT " \
+            "log_channel,log_message,log_user,log_timestamp " \
+            "FROM " \
+            "chatlog")
         rows = cursor.fetchall()
         if self.debug:
             for table in rows:
                 print(table)
         self.disconnect()
+
+    def get_log_entry_by_message(self, log_message: str) -> list:
+        entries = []
+        with self.connect().cursor() as cursor:
+            cursor.execute("""
+                SELECT
+                    log_channel, log_message, log_user, log_timestamp
+                FROM
+                    chatlog
+                WHERE
+                    log_message = %(log_message)s"""
+                , 
+                {"log_message": log_message})
+
+            result = cursor.fetchall()
+
+            if result is None:
+                return False
+
+            for row in result:
+                entries.append(row)
+            
+            return entries
+
+    def get_log_entry_by_user(self, log_user: str) -> list:
+        entries = []
+        with self.connect().cursor() as cursor:
+            cursor.execute("""
+                SELECT
+                    log_channel, log_message, log_user, log_timestamp
+                FROM
+                    chatlog
+                WHERE
+                    log_user = %(log_user)s"""
+                , 
+                {"log_user": log_user})
+
+            result = cursor.fetchall()
+
+            if result is None:
+                return False
+
+            for row in result:
+                entries.append(row)
+            
+            return entries
 
     def _create_table(self):
         if not self.service_mode:
