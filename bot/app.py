@@ -7,6 +7,8 @@ import os
 import textwrap
 import datetime
 from roboto import Roboto
+from hal import Hal
+
 from chatlog import Chatlog
 
 SERVER = os.getenv("IRC_SERVER", "inspircd")
@@ -22,6 +24,7 @@ client = OpenAI(api_key=API_KEY)
 
 use_chat_gpt = True
 rob = Roboto()
+hal = Hal()
 
 def split_into_chunks(s):
     return textwrap.wrap(s, IRC_MAX_MESSAGE_LENGTH)
@@ -29,6 +32,10 @@ def split_into_chunks(s):
 def ask_rob(input):
     print(f"ask_rob={input}")
     return rob.talk(query=input)
+
+def ask_hal(input):
+    print(f"ask_hal={ask_hal}")
+    return hal.response(user_response=input)
 
 def ask_gpt(prompt):
     try:
@@ -66,7 +73,8 @@ def on_message(connection, event):
         if use_chat_gpt:
             reply = ask_gpt(user_msg)
         else:
-            reply = ask_rob(user_msg)
+            reply = ask_hal(user_msg)
+            #reply = ask_rob(user_msg)
         
         reply = reply.strip()
         
